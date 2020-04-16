@@ -7,12 +7,17 @@
     </div>
 
     <div class="col-sm-6 d-flex justify-content-start">
-      <div [@painel-animado]="panelAnimado" *ngIf="cadastro; else formLogin">
+      <div [@painel-animado]="panelAnimado" 
+        (@painel-animado.start)="inicioAnimado()"
+        (@painel-animado.done)="fimAnimado()"
+        *ngIf="cadastro; else formLogin">
         <app-cadastro (exibePainel)="exibePainel($event)"></app-cadastro>
       </div>
 
       <ng-template #formLogin>
-        <div [@painel-animado]="panelAnimado">
+        <div [@painel-animado]="panelAnimado"
+          (@painel-animado.start)="inicioAnimado()"
+          (@painel-animado.done)="fimAnimado()">
           <app-login (exibePainel)="exibePainel($event)"></app-login>
         </div>
       </ng-template>
