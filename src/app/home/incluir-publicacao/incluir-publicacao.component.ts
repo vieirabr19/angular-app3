@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Subject, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -14,8 +14,13 @@ import { ProgressoService } from '../../progresso.service';
 })
 export class IncluirPublicacaoComponent implements OnInit {
 
-  public email: string;
-  public imagem: any;
+  @Output() public atualizaTimeLine: EventEmitter<any> = new EventEmitter<any>();
+
+  private email: string;
+  private imagem: any;
+
+  public progressoPublicacao: string = 'pendente';
+  public porcentagemUpload: number = 0;
 
   public formulario: FormGroup = new FormGroup({
     'titulo': new FormControl(null)
@@ -39,18 +44,20 @@ export class IncluirPublicacaoComponent implements OnInit {
       imagem: this.imagem
     });
 
-    let acompanhamentoUpload = interval(1500);
+    let acompanhamentoUpload = interval(1000);
     let continua = new Subject<boolean>();
     continua.next(true);
 
-    acompanhamentoUpload.pipe(
-      takeUntil(continua)      
-    )
-    .subscribe(() => {
-      console.log(this.progressoService.status);
-      console.log(this.progressoService.estado);
+    acompanhamentoUpload.pipe(takeUntil(continua)).subscribe(() => {
+      //console.log(this.progressoService.status);
+      //console.log(this.progressoService.estado);
+      this.progressoPublicacao = 'andamento';
+      this.porcentagemUpload = Math.round((this.progressoService.estado.bytesTransferred / this.progressoService.estado.totalBytes) * 100);
 
-      if (this.progressoService.status === 'Processo concluído.') {
+      if (this.progressoService.status === 'concluido.') {
+        this.progressoPublicacao = 'concluido';
+        // Emite um evento do componente parent (home)
+        this.atualizaTimeLine.emit();
         continua.next (false);
       }
     })    

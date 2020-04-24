@@ -10,8 +10,8 @@
 
 <br /><br /><br />
 <div class="container">
-  <app-publicacoes></app-publicacoes>
+  <app-publicacoes #publicacoes></app-publicacoes>
 
   <!-- modal -->
-  <app-incluir-publicacao></app-incluir-publicacao>
+  <app-incluir-publicacao (atualizaTimeLine)="atualizaTimeLine()"></app-incluir-publicacao>
 </div>
