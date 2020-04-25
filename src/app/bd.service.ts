@@ -36,31 +36,39 @@ export class Bd {
   public consultaPublicacoes(emailUsuario: string): Promise<any> {
     return new Promise((resolve, reject) => {
       firebase.database().ref(`publicacoes/${btoa(emailUsuario)}`)
+        .orderByKey()
         .once('value')
         .then((snapshot: any) => {
           let publicacoes: Array<any> = [];
 
           snapshot.forEach((childSnapshot: any) => {
-            let publicao: any = childSnapshot.val();
+            let publicacao = childSnapshot.val();
+            publicacao.key = childSnapshot.key;
 
+            publicacoes.push(publicacao);
+          })
+
+          return publicacoes.reverse();
+        })
+        .then((publicacoes: any) => {
+          publicacoes.forEach((publicacao: any) => {
             // consulta a url da imagem (storage)
             firebase.storage().ref()
-              .child(`imagem/${childSnapshot.key}`)
+              .child(`imagem/${publicacao.key}`)
               .getDownloadURL()
               .then((url: string) => {
-                publicao.url_imagem = url;
+                publicacao.url_imagem = url;
 
                 // consulta o nome do usuário
                 firebase.database().ref(`usuario_detalhe/${btoa(emailUsuario)}`)
                   .once('value')
                   .then((snapshot: any) => {
-                    publicao.nome_usuario = snapshot.val().nome_usuario;
+                    publicacao.nome_usuario = snapshot.val().nome_usuario;
                   })
+                })
+              });
 
-                publicacoes.push(publicao);
-              })
-          })
-          resolve(publicacoes);
+            resolve(publicacoes);
         })
     })
   }
